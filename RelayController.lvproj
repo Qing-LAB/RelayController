@@ -98,7 +98,7 @@
 				<Property Name="Bld_localDestDirType" Type="Str">relativeToCommon</Property>
 				<Property Name="Bld_modifyLibraryFile" Type="Bool">true</Property>
 				<Property Name="Bld_previewCacheID" Type="Str">{079DF37A-8A4B-4569-9ED0-A270695B84F6}</Property>
-				<Property Name="Bld_version.build" Type="Int">1</Property>
+				<Property Name="Bld_version.build" Type="Int">2</Property>
 				<Property Name="Bld_version.major" Type="Int">1</Property>
 				<Property Name="Destination[0].destName" Type="Str">RelayController.exe</Property>
 				<Property Name="Destination[0].path" Type="Path">../builds/NI_AB_PROJECTNAME/RelayController/RelayController.exe</Property>
@@ -213,7 +213,7 @@
 				<Property Name="INST_buildSpecName" Type="Str">RelayControllerInstaller</Property>
 				<Property Name="INST_defaultDir" Type="Str">{5989C7E0-5ED4-4A41-A104-0A21A8B42B36}</Property>
 				<Property Name="INST_productName" Type="Str">RelayController</Property>
-				<Property Name="INST_productVersion" Type="Str">1.0.1</Property>
+				<Property Name="INST_productVersion" Type="Str">1.0.2</Property>
 				<Property Name="InstSpecBitness" Type="Str">32-bit</Property>
 				<Property Name="InstSpecVersion" Type="Str">16008024</Property>
 				<Property Name="MSI_autoselectDrivers" Type="Bool">true</Property>

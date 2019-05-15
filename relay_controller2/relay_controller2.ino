@@ -7,7 +7,7 @@
 #include <Wire.h>
 
 const float RELAYCONTROL_VER = 0.2;
-const char * cmd_list[] = {"HELLO", "RESET", "SET_ON", "SET_OFF", "SET_RELAYS_STATUS", "READ_RELAYS_STATUS"}; //, "SET_DIGITAL_HIGH", "SET_DIGITAL_LOW", "v", "q"};
+const char * cmd_list[] = {"HELLO", "RESET", "SET_ON", "SET_OFF", "SET_RELAYS_STATUS", "READ_RELAYS_STATUS", "SCANI2C"}; //, "SET_DIGITAL_HIGH", "SET_DIGITAL_LOW", "v", "q"};
 // HELLO for the first time is handshake, afterwards nothing
 // RESET sets all relay to off, and expect to wait for HELLO handshake message
 // SET_ON/SET_OFF + channel sets single relay channel on/off
@@ -73,7 +73,51 @@ void I2C_write_reg(unsigned char addr, byte reg, byte value)
   Wire.beginTransmission(addr);
   Wire.write(reg);
   Wire.write(value);
-  Wire.endTransmission();
+  int error = Wire.endTransmission();
+  if (error != 0) {
+    Serial.print("I2C write error at address 0x");
+    Serial.print(addr, HEX);
+    Serial.print(" with register 0x");
+    Serial.print(reg, HEX);
+    Serial.print(" for value 0x");
+    Serial.print(value, HEX);
+    Serial.print(". Error code: 0x");
+    Serial.println(error, HEX);
+  }
+}
+
+void Scan_I2C()
+{
+  byte error, address;
+  int nDevices;
+
+  Serial.println("Scanning...");
+  nDevices = 0;
+  for (address = 0; address <= 127; address++ )
+  {
+    // The i2c_scanner uses the return value of
+    // the Write.endTransmisstion to see if
+    // a device did acknowledge to the address.
+    Wire.beginTransmission(address);
+    error = Wire.endTransmission(true);
+
+    if (address < 16) Serial.print("0");
+    Serial.print(address, HEX);
+    if (error == 0) {
+      Serial.print("[found!]");
+      nDevices++;
+    } else {
+      Serial.print("["); Serial.print(error); Serial.print("]     ");
+    }
+    Serial.print( (address % 8) == 7 ? "\n" : " ");   
+  }
+  if (nDevices == 0){
+    Serial.println("No I2C devices were found");
+  }
+  else{
+    Serial.print(nDevices);
+    Serial.println(" I2C devices were found.");
+  }
 }
 
 int next_token(char * cmd, int startpos, int * pstr_start, int * pstr_end)
@@ -179,37 +223,10 @@ int parse_cmd(int * pstate) //state 0 means waiting for start signal
         case 5: //READ_RELAY_STATUS
           Serial.println((unsigned long)(((unsigned long)relay_bank2_state << 16) | (unsigned long)relay_bank1_state));
           break;
-/*        case 6: //SET_DIGITAL_HIGH
-          digital_pin = strtoul(read_buf + q, NULL, 0);
-          if (digital_pin >= MIN_DIG_PIN && digital_pin <= MAX_DIG_PIN) {
-            digitalWrite(digital_pin, HIGH);
-            Serial.print("SETTING DIGITAL PIN ");
-            Serial.print(digital_pin);
-            Serial.println(" TO HIGH.");
-          }
-          else {
-            Serial.println("WRONG DIGITAL PIN.");
-          }
+        case 6: //SCANI2C
+          Scan_I2C();
           break;
-        case 7: //SET_DIGITAL_LOW
-          digital_pin = strtoul(read_buf + q, NULL, 0);
-          if (digital_pin >= MIN_DIG_PIN && digital_pin <= MAX_DIG_PIN) {
-            digitalWrite(digital_pin, LOW);
-            Serial.print("SETTING DIGITAL PIN ");
-            Serial.print(digital_pin);
-            Serial.println(" TO LOW.");
-          }
-          else {
-            Serial.println("WRONG DIGITAL PIN.");
-          }
-          break;
-        case 8: // v
-          Serial.print("simulated firmware for BD-CRVII v0.1\r");
-          break;
-        case 9: // q
-          Serial.print("q1 1 1 0 0 0 0 0 0\r");
-          break;
-*/        default:
+        default:
           //Serial.println("?");
           break;
       }
